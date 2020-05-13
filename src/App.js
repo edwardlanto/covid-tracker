@@ -1,58 +1,74 @@
-import React , { useEffect }from 'react';
+import React, { useEffect, useState } from 'react';
 import Card from 'react-bootstrap/Card';
 import CardDeck from 'react-bootstrap/CardDeck';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import axios from "axios";
+import axios from 'axios';
+import "./index.css";
 
 function App() {
+  const [latest, setLatest] = useState();
+  const [results, setResults] = useState([])
   useEffect(() => {
     axios
-      .get("https://corona.lmao.ninja/v2/all")
-      .then(res => {
-        console.log(res.data);
+      .all([
+        axios.get('https://corona.lmao.ninja/v2/all'),
+        axios.get('https://corona.lmao.ninja/v2/countries')
+      ])
+      .then((res) => {
+        setLatest(res[0].data);
+        setResults(res[1].data)
       })
-  })
+      .catch((err) => {
+        console.log(err);
+      });
+  });
+
+  const date = 'test'
+  const lastUpdated = date.toString();
+
+  const countries = results.map(data => (
+    <Card>
+      <Card.Body>
+        <Card.Title>{data.country}</Card.Title>
+        <Card.Text>Cases {data.cases}</Card.Text>
+      </Card.Body>
+    </Card>
+  ));
   return (
     <div className="App">
       <CardDeck>
-        <Card bg="secondary" text="white" className="text-center" style={{ margin: "10px" }}>
-          <Card.Img variant="top" src="holder.js/100px160" />
+        <Card bg="secondary" text="white" className="text-center" style={{ margin: '10px' }}>
+          <Card.Img variant="top" />
           <Card.Body>
             <Card.Title>Cases</Card.Title>
-            <Card.Text>
-              100
-						</Card.Text>
+            <Card.Text>{latest.cases}</Card.Text>
           </Card.Body>
           <Card.Footer>
-            <small className="text-muted">Last updated 3 mins ago</small>
+            <small text="white">Last updated {lastUpdated}</small>
           </Card.Footer>
         </Card>
-        <Card bg="danger" text="white" className="text-center" style={{ margin: "10px" }}>
-          <Card.Img variant="top" src="holder.js/100px160" />
+        <Card bg="danger" text="white" className="text-center" style={{ margin: '10px' }}>
+          <Card.Img variant="top" />
           <Card.Body>
-            <Card.Title>Card title</Card.Title>
-            <Card.Text>
-              This card has supporting text below as a natural lead-in to additional content.{' '}
-            </Card.Text>
+            <Card.Title>Death</Card.Title>
+            <Card.Text>{latest.deaths}</Card.Text>
           </Card.Body>
           <Card.Footer>
-            <small className="text-muted">Last updated 3 mins ago</small>
+            <small text="white">Last updated {lastUpdated}</small>
           </Card.Footer>
         </Card>
-        <Card bg="success" text="white" className="text-center" style={{ margin: "10px" }}>
-          <Card.Img variant="top" src="holder.js/100px160" />
+        <Card bg="success" text="white" className="text-center" style={{ margin: '10px' }}>
+          <Card.Img variant="top" />
           <Card.Body>
-            <Card.Title>Card title</Card.Title>
-            <Card.Text>
-              This is a wider card with supporting text below as a natural lead-in to additional content.
-              This card has even longer content than the first to show that equal height action.
-						</Card.Text>
+            <Card.Title>Recovered</Card.Title>
+            <Card.Text>{latest.recovered}</Card.Text>
           </Card.Body>
           <Card.Footer>
-            <small className="text-muted">Last updated 3 mins ago</small>
+            <small text="white">Last updated {lastUpdated}</small>
           </Card.Footer>
         </Card>
       </CardDeck>
+      {countries}
     </div>
   );
 }
