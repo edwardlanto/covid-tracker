@@ -6,8 +6,6 @@ import axios from 'axios';
 import "./index.css";
 
 function App() {
-  const [latest, setLatest] = useState();
-  const [results, setResults] = useState([])
   useEffect(() => {
     axios
       .all([
@@ -22,15 +20,30 @@ function App() {
         console.log(err);
       });
   });
-
-  const date = 'test'
+  const [latest, setLatest] = useState("");
+  const [results, setResults] = useState([])
+  const date = new Date(parseInt(latest.updated));
   const lastUpdated = date.toString();
 
   const countries = results.map(data => (
-    <Card>
+    <Card
+      bg="light"
+      text="dark"
+      className="text-center"
+      style={{ margin: "10px" }}
+    >
       <Card.Body>
-        <Card.Title>{data.country}</Card.Title>
-        <Card.Text>Cases {data.cases}</Card.Text>
+        <Card.Img variant="top" src={data.countryInfo.flag} />
+        <Card.Body>
+          <Card.Title>{data.country}</Card.Title>
+          <Card.Text>Cases {data.cases}</Card.Text>
+          <Card.Text>Deaths {data.deaths}</Card.Text>
+          <Card.Text>Recovered {data.recovered}</Card.Text>
+          <Card.Text>Today's cases{data.todayCases}</Card.Text>
+          <Card.Text>Today's deaths {data.todayDeaths}</Card.Text>
+          <Card.Text>Active {data.active}</Card.Text>
+          <Card.Text>Critical {data.critical}</Card.Text>
+        </Card.Body>
       </Card.Body>
     </Card>
   ));
