@@ -5,6 +5,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import axios from 'axios';
 import "./index.css";
 import Columns from 'react-columns';
+import logo from './assets/loader.gif';
 import Form from 'react-bootstrap/Form';
 
 function App() {
@@ -15,12 +16,11 @@ function App() {
         axios.get('https://corona.lmao.ninja/v2/countries')
       ])
       .then((res) => {
-
+        console.log(res[1]);
         // Lowercasing all countries
         for (var i = 0; i < res[1].data.length; i++) {
           res[1].data[i].country = res[1].data[i].country.toLowerCase();
         }
-        console.log(res[1].data);
         setLatest(res[0].data);
         setResults(res[1].data);
       })
@@ -40,8 +40,8 @@ function App() {
     return item.country.includes(searchCountries)
   });
 
-  const sortByName = () => {
-    console.log(countries);
+  const capitalize = str => {
+    return str.toUpperCase();
   }
 
   const countries = filterCountries.map((data, i) => (
@@ -55,7 +55,7 @@ function App() {
       <Card.Body>
         <Card.Img variant="top" src={data.countryInfo.flag} className="flag" />
         <Card.Body>
-          <Card.Title>{data.country}</Card.Title>
+          <Card.Title>{capitalize(data.country)}</Card.Title>
           <Card.Text>Cases {data.cases}</Card.Text>
           <Card.Text>Deaths {data.deaths}</Card.Text>
           <Card.Text>Recovered {data.recovered}</Card.Text>
@@ -114,23 +114,20 @@ function App() {
           <Form.Control
             type="text"
             placeholder="Search a country"
-            onChange={e => setSearchCountries(e.target.value)}
+            onChange={e => setSearchCountries(e.target.value, e)}
           />
         </Form.Group>
       </Form>
-      <div className="text-center">
-        <button onClick={() => sortByName()}>Sort By Name</button>
-      </div>
       {err ? <div>{err}</div> : ""}
       {
         countries.length > 0 ?
           <Columns queries={queries}>
             {countries}
           </Columns>
-          : <div>Loading</div>
+          : <div className="text-center">
+            <img src={logo} style={{ margin: "20px" }} alt="loading spinner"/>
+          </div>
       }
-
-
     </div>
   );
 }

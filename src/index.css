@@ -2,8 +2,13 @@
   height:270px;
 }
 
+.form-control{
+  max-width:50%;
+  margin:0 auto;
+}
+
 @media (max-width:600px){
   .flag{
-    height:auto;
+    height:170;
   }
 }
