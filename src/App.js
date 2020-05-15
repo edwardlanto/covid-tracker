@@ -1,12 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import Card from 'react-bootstrap/Card';
+import React, { useEffect, useState, Suspense } from 'react';
 import CardDeck from 'react-bootstrap/CardDeck';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import Card from 'react-bootstrap/Card';
 import axios from 'axios';
-import "./index.css";
 import Columns from 'react-columns';
 import logo from './assets/loader.gif';
 import Form from 'react-bootstrap/Form';
+import "./index.css";
+import 'bootstrap/dist/css/bootstrap.min.css';
+const ListItem = React.lazy(() => import('./components/ListItem'));
 
 function App() {
   useEffect(() => {
@@ -16,7 +17,7 @@ function App() {
         axios.get('https://corona.lmao.ninja/v2/countries')
       ])
       .then((res) => {
-        console.log(res[1]);
+
         // Lowercasing all countries
         for (var i = 0; i < res[1].data.length; i++) {
           res[1].data[i].country = res[1].data[i].country.toLowerCase();
@@ -40,32 +41,20 @@ function App() {
     return item.country.includes(searchCountries)
   });
 
-  const capitalize = str => {
-    return str.toUpperCase();
-  }
-
   const countries = filterCountries.map((data, i) => (
-    <Card
-      bg="light"
-      text="dark"
-      className="text-center"
-      key={i}
-      style={{ margin: "10px" }}
-    >
-      <Card.Body>
-        <Card.Img variant="top" src={data.countryInfo.flag} className="flag" />
-        <Card.Body>
-          <Card.Title>{capitalize(data.country)}</Card.Title>
-          <Card.Text>Cases {data.cases}</Card.Text>
-          <Card.Text>Deaths {data.deaths}</Card.Text>
-          <Card.Text>Recovered {data.recovered}</Card.Text>
-          <Card.Text>Today's cases{data.todayCases}</Card.Text>
-          <Card.Text>Today's deaths {data.todayDeaths}</Card.Text>
-          <Card.Text>Active {data.active}</Card.Text>
-          <Card.Text>Critical {data.critical}</Card.Text>
-        </Card.Body>
-      </Card.Body>
-    </Card>
+    <Suspense fallback={<div></div>}>
+      <ListItem key={i} style={{ margin: "10px" }}
+        img={data.countryInfo.flag}
+        country={data.country}
+        cases={data.cases}
+        deaths={data.deaths}
+        recovered={data.recovered}
+        todayCases={data.todayCases}
+        todayDeaths={data.todayDeaths}
+        active={data.active}
+        critical={data.critical}
+      />
+    </Suspense>
   ));
 
   var queries = [{
@@ -125,7 +114,7 @@ function App() {
             {countries}
           </Columns>
           : <div className="text-center">
-            <img src={logo} style={{ margin: "20px" }} alt="loading spinner"/>
+            <img src={logo} style={{ margin: "20px" }} alt="loading spinner" />
           </div>
       }
     </div>
