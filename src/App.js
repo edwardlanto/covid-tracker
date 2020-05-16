@@ -7,11 +7,19 @@ import logo from './assets/loader.gif';
 import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-const ListItem = React.lazy(() => import('./components/ListItem'));
+import ListItem from './components/ListItem'
 
 function App() {
-  useEffect(() => {
-    axios
+
+  const [latest, setLatest] = useState([]);
+  const [results, setResults] = useState([]);
+  const date = new Date(parseInt(latest.updated));
+  const lastUpdated = date.toString();
+  const [searchCountries, setSearchCountries] = useState("");
+  const [err, setErr] = useState("");
+
+  useEffect(async () => {
+    const fetch = await axios
       .all([
         axios.get('https://corona.lmao.ninja/v2/all'),
         axios.get('https://corona.lmao.ninja/v2/countries')
@@ -30,19 +38,12 @@ function App() {
       });
   });
 
-  const [latest, setLatest] = useState([]);
-  const [results, setResults] = useState([]);
-  const date = new Date(parseInt(latest.updated));
-  const lastUpdated = date.toString();
-  const [searchCountries, setSearchCountries] = useState("");
-  const [err, setErr] = useState("");
-
   const filterCountries = results.filter(item => {
     return item.country.includes(searchCountries)
   });
 
   const countries = filterCountries.map((data, i) => (
-    <Suspense fallback={<div></div>}>
+    <Suspense fallback={<div></div>} key={i}>
       <ListItem key={i} style={{ margin: "10px" }}
         img={data.countryInfo.flag}
         country={data.country}
