@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from 'react-bootstrap/Card';
+const Card = React.lazy(() => import('react-bootstrap/Card'));
 
 const ListItem = (props) => {
     const { img, country, cases, deaths, recovered, todayCases, todayDeaths, active, critical } = props;
