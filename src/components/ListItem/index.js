@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import Card from 'react-bootstrap/Card';
 
 const ListItem = (props) => {
     const { img, country, cases, deaths, recovered, todayCases, todayDeaths, active, critical } = props;
+
     return (
         <Card
             bg="light"
