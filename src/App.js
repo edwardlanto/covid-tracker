@@ -7,28 +7,9 @@ import logo from './assets/loader.gif';
 import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-const ListItem = React.lazy(() => import('./components/ListItem'));
+import ListItem from './components/ListItem';
 
 function App() {
-  useEffect(() => {
-    axios
-      .all([
-        axios.get('https://corona.lmao.ninja/v2/all'),
-        axios.get('https://corona.lmao.ninja/v2/countries')
-      ])
-      .then((res) => {
-
-        // Lowercasing all countries
-        for (var i = 0; i < res[1].data.length; i++) {
-          res[1].data[i].country = res[1].data[i].country.toLowerCase();
-        }
-        setLatest(res[0].data);
-        setResults(res[1].data);
-      })
-      .catch((err) => {
-        setErr(err);
-      });
-  });
 
   const [latest, setLatest] = useState([]);
   const [results, setResults] = useState([]);
@@ -36,13 +17,51 @@ function App() {
   const lastUpdated = date.toString();
   const [searchCountries, setSearchCountries] = useState("");
   const [err, setErr] = useState("");
+  const [isFetching, setIsFetching] = useState(false);
 
-  const filterCountries = results.filter(item => {
-    return item.country.includes(searchCountries)
-  });
+  async function fetchStats() {
+    try {
+      let res = await axios
+        .all([
+          axios.get('https://corona.lmao.ninja/v2/all'),
+          axios.get('https://corona.lmao.ninja/v2/countries')
+        ]);
 
-  const countries = filterCountries.map((data, i) => (
-    <Suspense fallback={<div></div>}>
+      // Lowercasing all countries
+      for (var i = 0; i < res[1].data.length; i++) {
+        res[1].data[i].country = res[1].data[i].country.toLowerCase();
+      }
+
+      setLatest(res[0].data);
+      setResults(res[1].data);
+    } catch (err) {
+      console.log('err', err);
+    }
+  }
+
+  useEffect(() => {
+    fetchStats();
+  }, []);
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  function handleScroll() {
+    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight){
+      console.log('handle scrolled');
+    }
+
+    setIsFetching(true);
+  }
+
+  // const filterCountries = countries.filter(item => {
+  //   return item.country.includes(searchCountries)
+  // });
+
+  const countries = results.map((data, i) => {
+    return (
       <ListItem key={i} style={{ margin: "10px" }}
         img={data.countryInfo.flag}
         country={data.country}
@@ -54,8 +73,8 @@ function App() {
         active={data.active}
         critical={data.critical}
       />
-    </Suspense>
-  ));
+    )
+  });
 
   var queries = [{
     columns: 2,
@@ -64,6 +83,7 @@ function App() {
     columns: 3,
     query: 'min-width:1000px'
   }];
+
   return (
     <div className="App">
       <CardDeck>
@@ -108,15 +128,7 @@ function App() {
         </Form.Group>
       </Form>
       {err ? <div>{err}</div> : ""}
-      {
-        countries.length > 0 ?
-          <Columns queries={queries}>
-            {countries}
-          </Columns>
-          : <div className="text-center">
-            <img src={logo} style={{ margin: "20px" }} alt="loading spinner" />
-          </div>
-      }
+      { countries }
     </div>
   );
 }
