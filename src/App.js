@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import CardDeck from 'react-bootstrap/CardDeck';
 import Card from 'react-bootstrap/Card';
 import axios from 'axios';
@@ -8,6 +8,8 @@ import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ListItem from './components/ListItem'
+import useIO from './helpers/UseIO';
+import { Image } from './components/Image';
 
 function App() {
 
@@ -18,45 +20,87 @@ function App() {
   const [searchCountries, setSearchCountries] = useState("");
   const [err, setErr] = useState("");
 
-  useEffect(async () => {
-    const fetch = await axios
-      .all([
-        axios.get('https://corona.lmao.ninja/v2/all'),
-        axios.get('https://corona.lmao.ninja/v2/countries')
-      ])
-      .then((res) => {
+  useEffect(() => {
 
-        // Lowercasing all countries
-        for (var i = 0; i < res[1].data.length; i++) {
-          res[1].data[i].country = res[1].data[i].country.toLowerCase();
-        }
-        setLatest(res[0].data);
-        setResults(res[1].data);
-      })
-      .catch((err) => {
-        setErr(err);
-      });
+    //an initial load of some data
+    getData();
+
+  }, []);
+
+  const [observer, setElements, entries] = useIO({
+    threshold: 0.25,
+    root: null
   });
+
+  useEffect(() => {
+    if (results.length) {
+      let img = Array.from(document.getElementsByClassName('lazy'));
+      setElements(img)
+    }
+  }, [results, setElements]);
+
+  useEffect(() => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        let lazyImage = entry.target;
+        lazyImage.src = lazyImage.dataset.src;
+        lazyImage.classList.remove("lazy");
+        observer.unobserve(lazyImage);
+      }
+    })
+  }, [entries, observer]);
+
+  async function getData() {
+    try {
+      const res = await axios
+        .all([
+          axios.get('https://corona.lmao.ninja/v2/all'),
+          axios.get('https://corona.lmao.ninja/v2/countries')
+        ]);
+      // Lowercasing all countries
+      for (var i = 0; i < res[1].data.length; i++) {
+        res[1].data[i].country = res[1].data[i].country.toLowerCase();
+      }
+
+      setLatest(res[0].data);
+      setResults(res[1].data);
+    } catch (err) {
+      setErr(err);
+      throw new Error("Image did not load");
+    };
+  };
 
   const filterCountries = results.filter(item => {
-    return item.country.includes(searchCountries)
+    return item.country.includes(searchCountries);
   });
 
-  const countries = filterCountries.map((data, i) => (
-    <Suspense fallback={<div></div>} key={i}>
-      <ListItem key={i} style={{ margin: "10px" }}
-        img={data.countryInfo.flag}
-        country={data.country}
-        cases={data.cases}
-        deaths={data.deaths}
-        recovered={data.recovered}
-        todayCases={data.todayCases}
-        todayDeaths={data.todayDeaths}
-        active={data.active}
-        critical={data.critical}
-      />
-    </Suspense>
-  ));
+  const countries = filterCountries.map((data, i) => {
+    return (
+      <>
+        <div key={i}>
+          <Image
+            src={data.countryInfo.flag}
+            isLazy
+            alt='thumbnails'
+            fallbackSrc={logo}
+            country={data.country}
+          />
+          <ListItem key={i}
+            img={data.countryInfo.flag}
+            country={data.country}
+            cases={data.cases}
+            deaths={data.deaths}
+            recovered={data.recovered}
+            todayCases={data.todayCases}
+            todayDeaths={data.todayDeaths}
+            active={data.active}
+            logo={logo}
+            critical={data.critical}
+          />
+        </div>
+      </>
+    );
+  });
 
   var queries = [{
     columns: 2,
@@ -67,7 +111,7 @@ function App() {
   }];
   return (
     <div className="App">
-      <CardDeck>
+      <CardDeck id="card-body">
         <Card bg="secondary" text="white" className="text-center" style={{ margin: '10px' }}>
           <Card.Img variant="top" />
           <Card.Body>
@@ -118,6 +162,8 @@ function App() {
             <img src={logo} style={{ margin: "20px" }} alt="loading spinner" />
           </div>
       }
+      <div id="footer">
+      </div>
     </div>
   );
 }
