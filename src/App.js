@@ -1,4 +1,4 @@
-import React, { useEffect, useState, Suspense } from 'react';
+import React, { useEffect, useState } from 'react';
 import CardDeck from 'react-bootstrap/CardDeck';
 import Card from 'react-bootstrap/Card';
 import axios from 'axios';
@@ -7,7 +7,9 @@ import logo from './assets/loader.gif';
 import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import ListItem from './components/ListItem';
+import ListItem from './components/ListItem'
+import useIO from './helpers/UseIO';
+import { Image } from './components/Image';
 
 function App() {
 
@@ -17,16 +19,44 @@ function App() {
   const lastUpdated = date.toString();
   const [searchCountries, setSearchCountries] = useState("");
   const [err, setErr] = useState("");
-  const [isFetching, setIsFetching] = useState(false);
 
-  async function fetchStats() {
+  useEffect(() => {
+
+    //an initial load of some data
+    getData();
+
+  }, []);
+
+  const [observer, setElements, entries] = useIO({
+    threshold: 0.25,
+    root: null
+  });
+
+  useEffect(() => {
+    if (results.length) {
+      let img = Array.from(document.getElementsByClassName('lazy'));
+      setElements(img)
+    }
+  }, [results, setElements]);
+
+  useEffect(() => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        let lazyImage = entry.target;
+        lazyImage.src = lazyImage.dataset.src;
+        lazyImage.classList.remove("lazy");
+        observer.unobserve(lazyImage);
+      }
+    })
+  }, [entries, observer]);
+
+  async function getData() {
     try {
-      let res = await axios
+      const res = await axios
         .all([
           axios.get('https://corona.lmao.ninja/v2/all'),
           axios.get('https://corona.lmao.ninja/v2/countries')
         ]);
-
       // Lowercasing all countries
       for (var i = 0; i < res[1].data.length; i++) {
         res[1].data[i].country = res[1].data[i].country.toLowerCase();
@@ -35,45 +65,41 @@ function App() {
       setLatest(res[0].data);
       setResults(res[1].data);
     } catch (err) {
-      console.log('err', err);
-    }
-  }
+      setErr(err);
+      throw new Error("Image did not load");
+    };
+  };
 
-  useEffect(() => {
-    fetchStats();
-  }, []);
+  const filterCountries = results.filter(item => {
+    return item.country.includes(searchCountries);
+  });
 
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  function handleScroll() {
-    if ((window.innerHeight + window.scrollY) >= document.body.offsetHeight){
-      console.log('handle scrolled');
-    }
-
-    setIsFetching(true);
-  }
-
-  // const filterCountries = countries.filter(item => {
-  //   return item.country.includes(searchCountries)
-  // });
-
-  const countries = results.map((data, i) => {
+  const countries = filterCountries.map((data, i) => {
     return (
-      <ListItem key={i} style={{ margin: "10px" }}
-        img={data.countryInfo.flag}
-        country={data.country}
-        cases={data.cases}
-        deaths={data.deaths}
-        recovered={data.recovered}
-        todayCases={data.todayCases}
-        todayDeaths={data.todayDeaths}
-        active={data.active}
-        critical={data.critical}
-      />
-    )
+      <>
+        <div key={i}>
+          <Image
+            src={data.countryInfo.flag}
+            isLazy
+            alt='thumbnails'
+            fallbackSrc={logo}
+            country={data.country}
+          />
+          <ListItem key={i}
+            img={data.countryInfo.flag}
+            country={data.country}
+            cases={data.cases}
+            deaths={data.deaths}
+            recovered={data.recovered}
+            todayCases={data.todayCases}
+            todayDeaths={data.todayDeaths}
+            active={data.active}
+            logo={logo}
+            critical={data.critical}
+          />
+        </div>
+      </>
+    );
   });
 
   var queries = [{
@@ -83,10 +109,9 @@ function App() {
     columns: 3,
     query: 'min-width:1000px'
   }];
-
   return (
     <div className="App">
-      <CardDeck>
+      <CardDeck id="card-body">
         <Card bg="secondary" text="white" className="text-center" style={{ margin: '10px' }}>
           <Card.Img variant="top" />
           <Card.Body>
@@ -128,7 +153,17 @@ function App() {
         </Form.Group>
       </Form>
       {err ? <div>{err}</div> : ""}
-      { countries }
+      {
+        countries.length > 0 ?
+          <Columns queries={queries}>
+            {countries}
+          </Columns>
+          : <div className="text-center">
+            <img src={logo} style={{ margin: "20px" }} alt="loading spinner" />
+          </div>
+      }
+      <div id="footer">
+      </div>
     </div>
   );
 }
