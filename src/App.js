@@ -8,7 +8,8 @@ import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ListItem from './components/ListItem'
-import useIO from './helpers/UseIO';
+import _ from "lodash";
+import { useIO } from './helpers/UseIO';
 import { Image } from './components/Image';
 
 function App() {
@@ -57,7 +58,8 @@ function App() {
           axios.get('https://corona.lmao.ninja/v2/all'),
           axios.get('https://corona.lmao.ninja/v2/countries')
         ]);
-      // Lowercasing all countries
+
+      // // Lowercasing all countries
       for (var i = 0; i < res[1].data.length; i++) {
         res[1].data[i].country = res[1].data[i].country.toLowerCase();
       }
@@ -71,34 +73,34 @@ function App() {
   };
 
   const filterCountries = results.filter(item => {
-    return item.country.includes(searchCountries);
+      if (item.country.includes(searchCountries)){
+        return item;
+      }
   });
 
   const countries = filterCountries.map((data, i) => {
     return (
-      <>
-        <div key={i}>
-          <Image
-            src={data.countryInfo.flag}
-            isLazy
-            alt='thumbnails'
-            fallbackSrc={logo}
-            country={data.country}
-          />
-          <ListItem key={i}
-            img={data.countryInfo.flag}
-            country={data.country}
-            cases={data.cases}
-            deaths={data.deaths}
-            recovered={data.recovered}
-            todayCases={data.todayCases}
-            todayDeaths={data.todayDeaths}
-            active={data.active}
-            logo={logo}
-            critical={data.critical}
-          />
-        </div>
-      </>
+      <div key={i}>
+        <Image
+          src={data.countryInfo.flag}
+          isLazy
+          alt='thumbnails'
+          fallbackSrc={logo}
+          country={data.country}
+        />
+        <ListItem key={i}
+          img={data.countryInfo.flag}
+          country={data.country}
+          cases={data.cases}
+          deaths={data.deaths}
+          recovered={data.recovered}
+          todayCases={data.todayCases}
+          todayDeaths={data.todayDeaths}
+          active={data.active}
+          logo={logo}
+          critical={data.critical}
+        />
+      </div>
     );
   });
 
@@ -148,7 +150,7 @@ function App() {
           <Form.Control
             type="text"
             placeholder="Search a country"
-            onChange={e => setSearchCountries(e.target.value, e)}
+            onChange={e => setSearchCountries(e.target.value.toLowerCase())}
           />
         </Form.Group>
       </Form>
