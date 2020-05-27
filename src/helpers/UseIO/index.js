@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from 'react';
 
-export const useIO = (options) => {
+export const useIO = () => {
 	const [elements, setElements] = useState([]);
 	const [entries, setEntries] = useState([]);
-
 	const observer = useRef(null);
 
 

@@ -8,7 +8,6 @@ import Form from 'react-bootstrap/Form';
 import "./index.css";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import ListItem from './components/ListItem'
-import _ from "lodash";
 import { useIO } from './helpers/UseIO';
 import { Image } from './components/Image';
 
@@ -28,10 +27,7 @@ function App() {
 
   }, []);
 
-  const [observer, setElements, entries] = useIO({
-    threshold: 0.25,
-    root: null
-  });
+  const [observer, setElements, entries] = useIO();
 
   useEffect(() => {
     if (results.length) {
@@ -73,9 +69,7 @@ function App() {
   };
 
   const filterCountries = results.filter(item => {
-      if (item.country.includes(searchCountries)){
-        return item;
-      }
+     return item.country.includes(searchCountries)
   });
 
   const countries = filterCountries.map((data, i) => {
@@ -83,9 +77,7 @@ function App() {
       <div key={i}>
         <Image
           src={data.countryInfo.flag}
-          isLazy
           alt='thumbnails'
-          fallbackSrc={logo}
           country={data.country}
         />
         <ListItem key={i}
