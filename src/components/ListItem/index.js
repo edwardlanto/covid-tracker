@@ -1,12 +1,12 @@
 import React from 'react';
-const Card = React.lazy(() => import('react-bootstrap/Card'));
+import Card from 'react-bootstrap/Card';
 
 const ListItem = (props) => {
 	const { src, country, cases, deaths, recovered, todayCases, todayDeaths, active, critical } = props;
 	return (
 		<Card bg="light" text="dark" className="text-center" style={{ margin: '10px' }}>
 			<Card.Body>
-				<img src={src} />
+				<img src={src} alt=""/>
 				<Card.Body>
 					<Card.Title className="country-title">{country}</Card.Title>
 					<Card.Text>Cases {cases}</Card.Text>

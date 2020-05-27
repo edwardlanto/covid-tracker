@@ -1,22 +1,16 @@
 import { useEffect, useRef, useState } from 'react';
 
-const useIO = (options) => {
+export const useIO = (options) => {
 	const [elements, setElements] = useState([]);
 	const [entries, setEntries] = useState([]);
 
 	const observer = useRef(null);
 
-	const { root, rootMargin, threshold } = options || {}
 
 	useEffect(() => {
 		if (elements.length) {
-			console.log('-----CONNECTING OBSERVER------');
 			observer.current = new IntersectionObserver((ioEntries) => {
 				setEntries(ioEntries);
-			}, {
-				threshold,
-				root,
-				rootMargin
 			});
 
 			elements.forEach(element => {
@@ -25,13 +19,10 @@ const useIO = (options) => {
 		}
 		return () => {
 			if (observer.current) {
-				console.log('-----DISCONNECTING OBSERVER------');
 				observer.current.disconnect();
 			}
 		}
-	}, [elements, root, rootMargin, threshold]);
+	}, [elements]);
 
 	return [observer.current, setElements, entries];
 };
-
-export default useIO;
