@@ -1,1 +1,0 @@
-{"version":3,"sources":["index.css"],"names":[],"mappings":"AAAA,MACE,YACF,CAEA,cACE,aAAa,CACb,aACF,CAEA,yBACE,MACE,UACF,CACF","file":"main.e1297914.chunk.css","sourcesContent":[".flag{\n  height:270px;\n}\n\n.form-control{\n  max-width:50%;\n  margin:0 auto;\n}\n\n@media (max-width:600px){\n  .flag{\n    height:170;\n  }\n}"]}
