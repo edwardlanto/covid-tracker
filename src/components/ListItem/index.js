@@ -2,11 +2,10 @@ import React from 'react';
 import Card from 'react-bootstrap/Card';
 
 const ListItem = (props) => {
-	const { src, country, cases, deaths, recovered, todayCases, todayDeaths, active, critical } = props;
+	const { country, cases, deaths, recovered, todayCases, todayDeaths, active, critical } = props;
 	return (
 		<Card bg="light" text="dark" className="text-center" style={{ margin: '10px' }}>
 			<Card.Body>
-				<img src={src} alt=""/>
 				<Card.Body>
 					<Card.Title className="country-title">{country}</Card.Title>
 					<Card.Text>Cases {cases}</Card.Text>
